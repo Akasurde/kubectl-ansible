@@ -1,10 +1,13 @@
-# kubectl-ansible
+# kubectl-ansible-playbook
+
+[![kubectl plugin](https://img.shields.io/badge/kubectl-plugin-blue.svg)](https://github.com/topics/kubectl-plugin)
+
 A Kubectl plugin to run Ansible Playbook on Pods using Ansible K8S Dynamic Inventory Plugin and Kubectl connection plugin
 
 **Table of Content**
 <!-- TOC -->
 
-- [kubectl-ansible](#kubectl-ansible)
+- [kubectl-ansible-playbook](#kubectl-ansible-playbook)
     - [Pre-requisites](#pre-requisites)
     - [Installation](#installation)
         - [Manual Installation](#manual-installation)
@@ -33,11 +36,11 @@ Install the plugin by copying the script in the $PATH of your shell.
 
 ```sh
 # Get source
-$ git clone https://github.com/Akasurde/kubectl-ansible.git
-$ cd kubectl-ansible
-$ chmod +x kubectl-ansible
+$ git clone https://github.com/Akasurde/kubectl-ansible-playbook.git
+$ cd kubectl-ansible-playbook
+$ chmod +x kubectl-ansible_playbook
 # Add kubectl-ansible to the install path.
-$ sudo cp -p kubectl-ansible /usr/local/bin
+$ sudo cp -p kubectl-ansible_playbook /usr/local/bin
 ```
 
 ## How to use
@@ -56,4 +59,4 @@ $ sudo cp -p kubectl-ansible /usr/local/bin
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/Akasurde/kubectl-ansible
+Bug reports and pull requests are welcome on GitHub at https://github.com/Akasurde/kubectl-ansible-playbook
