@@ -1,4 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#
+# A kubectl plugin to run Ansible Playbook on Kubernetes pods using a kubectl connection
+# plugin and k8s dynamic inventory plugin
+#
+
+[[ -n $DEBUG ]] && set -x -e
 
 help(){
     echo "Usage: "
@@ -11,32 +17,69 @@ options(){
     cat <<"EOF"
 Options:
   -h, --help                      Show this message
+  -i, --inventory INVENTORY       Specify Kubernetes dynamic inventory plugin configuration
 Example:
   Scenario1 - Run playbook on Kubernetes Pods in the given namespace
   $ kubectl ansible-playbook -i ~/inventory_k8s.yml main.yml --limit namespace_test_pods -v
 EOF
 }
 
+bin_check() {
+  if [[ "$(type kubectl &>/dev/null; echo $?)" -eq 1 ]]; then
+    echo "Error: missing kubectl command" >&2
+    echo "Please install kubectl (https://kubernetes.io/docs/tasks/tools/install-kubectl/)" >&2
+    exit 1
+  fi
+  if [[ "$(type ansible-playbook &>/dev/null; echo $?)" -eq 1 ]]; then
+    echo "Error: missing ansible-playbook command" >&2
+    echo "Please install Ansible (https://docs.ansible.com/ansible/latest/installation_guide/index.html)" >&2
+    exit 1
+  fi
+  # TODO: Add check for Ansible 2.9 and onwards
+  # TODO: Add check for Ansible K8S collection
+}
+
 plugin_main() {
+  # Check if required binary exists or not
+  bin_check
+
+  if [ $# -eq 0 ]; then
+    echo "Error: Please provide atleast one parameter" >&2
+    exit 1
+  fi
+
   while [ $# -gt 0 ] ; do
+    n_skip=1
     case $1 in
       "-h" | "--help")
         help
         exit 0
+        ;;
+      "-i" | "--inventory")
+        k8s_inventory_file=$2
+        n_skip=2
         ;;
       *)
         help >&2
         exit 1
         ;;
     esac
+    shift $n_skip
   done
 
-  if [[ "$(type kubectl &>/dev/null; echo $?)" -eq 1 ]]; then
-    echo "Error: missing kubectl command" >&2
-    echo "Please install kubectl (https://kubernetes.io/docs/tasks/tools/install-kubectl/)" >&2
+  if [ ! -f "${k8s_inventory_file}" ]; then
+    echo "Error: Please specify -i/--inventory as file"
     exit 1
   fi
 
+  if [[ "${k8s_inventory_file}" =~ .*k8s.yml$|.*k8s.yaml$ ]]; then
+    echo "Using: ${k8s_inventory_file} as inventory"
+  else
+    echo "Error: Inventory file must end with k8s.yml or k8s.yaml"
+    exit 1
+  fi
+
+  ansible-playbook -i ${k8s_inventory_file} "$@"
 }
 
 plugin_main "$@"
