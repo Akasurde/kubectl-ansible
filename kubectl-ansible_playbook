@@ -20,7 +20,7 @@ Options:
   -i, --inventory INVENTORY       Specify Kubernetes dynamic inventory plugin configuration
 Example:
   Scenario1 - Run playbook on Kubernetes Pods in the given namespace
-  $ kubectl ansible-playbook -i ~/inventory_k8s.yml main.yml --limit namespace_test_pods -v
+  $ kubectl ansible-playbook -i ~/inventory_k8s.yml --limit namespace_test_pods main.yml -vv
 EOF
 }
 
@@ -48,8 +48,8 @@ plugin_main() {
     exit 1
   fi
 
+
   while [ $# -gt 0 ] ; do
-    n_skip=1
     case $1 in
       "-h" | "--help")
         help
@@ -57,14 +57,17 @@ plugin_main() {
         ;;
       "-i" | "--inventory")
         k8s_inventory_file=$2
-        n_skip=2
+        shift 2
+        ;;
+      "--limit")
+        limit=$2
+        shift 2
         ;;
       *)
-        help >&2
-        exit 1
+        playbook=$@
+        shift $#
         ;;
     esac
-    shift $n_skip
   done
 
   if [ ! -f "${k8s_inventory_file}" ]; then
@@ -79,7 +82,7 @@ plugin_main() {
     exit 1
   fi
 
-  ansible-playbook -i ${k8s_inventory_file} "$@"
+  ansible-playbook -i ${k8s_inventory_file} --limit ${limit} ${playbook}
 }
 
 plugin_main "$@"
